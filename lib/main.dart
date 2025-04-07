@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
@@ -16,7 +19,63 @@ class TaskManagerApp extends StatelessWidget {
     return MaterialApp(
       title: 'Task Manager',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const TaskListScreen(),
+      home: FirebaseAuth.instance.currentUser == null
+          ? const LoginScreen()
+          : const TaskListScreen(),
+    );
+  }
+}
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  void _login() async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const TaskListScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Login')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(hintText: 'Email'),
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(hintText: 'Password'),
+              obscureText: true,
+            ),
+            ElevatedButton(
+              onPressed: _login,
+              child: const Text('Login'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -38,6 +97,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       await _firestore.collection('tasks').add({
         'name': task,
         'isCompleted': false,
+        'userId': FirebaseAuth.instance.currentUser?.uid,
       });
       _controller.clear();
     }
@@ -53,10 +113,26 @@ class _TaskListScreenState extends State<TaskListScreen> {
     await _firestore.collection('tasks').doc(taskId).delete();
   }
 
+  void _logout() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Task Manager')),
+      appBar: AppBar(
+        title: const Text('Task Manager'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -81,7 +157,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
             const SizedBox(height: 20),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection('tasks').snapshots(),
+                stream: _firestore
+                    .collection('tasks')
+                    .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                    .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
