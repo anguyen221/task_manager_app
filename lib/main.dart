@@ -46,7 +46,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Placeholder for button
+            // Placeholder for input and button
             Row(
               children: [
                 Expanded(
@@ -65,7 +65,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            // Placeholder for now
+            // Placeholder for task list
             Expanded(
               child: ListView.builder(
                 itemCount: _tasks.length,
