@@ -18,7 +18,10 @@ class TaskManagerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Task Manager',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
       home: FirebaseAuth.instance.currentUser == null
           ? const LoginScreen()
           : const TaskListScreen(),
@@ -62,27 +65,53 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(
+        title: const Text('Login'),
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(hintText: 'Email'),
+              decoration: InputDecoration(
+                hintText: 'Email',
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
             ),
+            const SizedBox(height: 12),
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(hintText: 'Password'),
+              decoration: InputDecoration(
+                hintText: 'Password',
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
               obscureText: true,
             ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _login,
-              child: const Text('Login'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Login', style: TextStyle(color: Colors.blue)),
             ),
+            const SizedBox(height: 10),
             TextButton(
               onPressed: _goToSignUp,
-              child: const Text('Don\'t have an account? Sign Up'),
+              child: const Text(
+                "Don't have an account? Sign Up",
+                style: TextStyle(color: Colors.blue),
+              ),
             ),
           ],
         ),
@@ -120,23 +149,45 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign Up')),
+      appBar: AppBar(
+        title: const Text('Sign Up'),
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(hintText: 'Email'),
+              decoration: InputDecoration(
+                hintText: 'Email',
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
             ),
+            const SizedBox(height: 12),
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(hintText: 'Password'),
+              decoration: InputDecoration(
+                hintText: 'Password',
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
               obscureText: true,
             ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _signUp,
-              child: const Text('Sign Up'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Sign Up', style: TextStyle(color: Colors.blue)),
             ),
           ],
         ),
@@ -191,6 +242,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Task Manager'),
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -207,15 +260,23 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Enter task name',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _addTask,
-                  child: const Text('Add'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Add', style: TextStyle(color: Colors.blue)),
                 ),
               ],
             ),
@@ -252,6 +313,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           onChanged: (_) {
                             _toggleTaskCompletion(taskId, isCompleted);
                           },
+                          activeColor: Colors.blue,
                         ),
                         leading: IconButton(
                           icon: const Icon(Icons.delete),
