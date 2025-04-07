@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,16 +30,27 @@ class TaskListScreen extends StatefulWidget {
 
 class _TaskListScreenState extends State<TaskListScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<String> _tasks = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  void _addTask() {
+  void _addTask() async {
     final task = _controller.text.trim();
     if (task.isNotEmpty) {
-      setState(() {
-        _tasks.add(task);
+      await _firestore.collection('tasks').add({
+        'name': task,
+        'isCompleted': false,
       });
       _controller.clear();
     }
+  }
+
+  void _toggleTaskCompletion(String taskId, bool isCompleted) async {
+    await _firestore.collection('tasks').doc(taskId).update({
+      'isCompleted': !isCompleted,
+    });
+  }
+
+  void _deleteTask(String taskId) async {
+    await _firestore.collection('tasks').doc(taskId).delete();
   }
 
   @override
@@ -68,11 +80,41 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
-                itemCount: _tasks.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(_tasks[index]),
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestore.collection('tasks').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text('No tasks available.'));
+                  }
+
+                  final tasks = snapshot.data!.docs;
+
+                  return ListView.builder(
+                    itemCount: tasks.length,
+                    itemBuilder: (context, index) {
+                      final task = tasks[index];
+                      final taskName = task['name'];
+                      final isCompleted = task['isCompleted'];
+                      final taskId = task.id;
+
+                      return ListTile(
+                        title: Text(taskName),
+                        trailing: Checkbox(
+                          value: isCompleted,
+                          onChanged: (_) {
+                            _toggleTaskCompletion(taskId, isCompleted);
+                          },
+                        ),
+                        leading: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () => _deleteTask(taskId),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
