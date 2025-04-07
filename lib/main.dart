@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const TaskManagerApp());
 }
 
@@ -46,7 +49,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Placeholder for input and button
             Row(
               children: [
                 Expanded(
@@ -65,7 +67,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            // Placeholder for task list
             Expanded(
               child: ListView.builder(
                 itemCount: _tasks.length,
